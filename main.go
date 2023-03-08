@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -28,15 +27,18 @@ func cors(fs http.Handler) http.HandlerFunc {
 }
 
 func main() {
-	var directory string
-	flag.StringVar(&directory, "directory", ".", "path to godot web export directory")
-
-	if ok, _ := exists(directory); !ok {
+	if len(os.Args) != 2 {
+		fmt.Println("Usage: godotwebserver <web-export-dir>")
 		os.Exit(1)
 	}
 
-	fmt.Println("Using directory:", directory)
+	directory := os.Args[1]
+	if ok, _ := exists(directory); !ok {
+		fmt.Println("No such file or directory:", directory)
+		os.Exit(1)
+	}
 
+	fmt.Println("Serving files from directory:", directory)
 	fs := http.FileServer(http.Dir(directory))
 	http.Handle("/", cors(fs))
 
